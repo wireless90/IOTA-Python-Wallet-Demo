@@ -13,6 +13,13 @@ SHIMMER_CLIENT_OPTIONS = {
 DEFAULT_DATABASE_FILENAME = './my_iota_db'
 DEFAULT_SECRET_FILENAME = 'stronghold'
 
+# TODO Remove it for production
+DEFAULT_PASSWORD = "password"
+
+# TODO Remove it for production
+DEFAULT_MNEMONIC = "flame fever pig forward exact dash body idea link scrub tennis minute \
+    surge unaware prosper over waste kitten ceiling human knife arch situate civil"
+    
 wallet: IotaWallet = None
 
 def pretty_print(input) -> None:
@@ -44,13 +51,6 @@ def check_wallet_initialized_status() -> bool:
     return True
 
 def handle_create_new_wallet() -> None:
-
-    # TODO Remove it for production
-    DEFAULT_PASSWORD = "password"
-
-    # TODO Remove it for production
-    DEFAULT_MNEMONIC = "flame fever pig forward exact dash body idea link scrub tennis minute \
-        surge unaware prosper over waste kitten ceiling human knife arch situate civil"
 
     mnemonic = input('Enter your 24 word mnemonic. Do write your mnemonic in a paper and store it away safely.\n')
     password = input('Enter a password\n')
