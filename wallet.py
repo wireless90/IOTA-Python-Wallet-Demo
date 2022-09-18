@@ -1,5 +1,4 @@
 from __future__ import annotations
-from unittest.mock import DEFAULT
 from iota_wallet import StrongholdSecretManager, IotaWallet, Account
 
 class ShimmerWallet:
