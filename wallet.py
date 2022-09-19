@@ -1,4 +1,5 @@
 from __future__ import annotations
+from audioop import add
 from iota_wallet import StrongholdSecretManager, IotaWallet, Account
 import requests
 import json
@@ -61,11 +62,17 @@ class ShimmerWallet:
     def __init__(self, password :str=DEFAULT_PASSWORD):
         self.secret_manager :StrongholdSecretManager = ShimmerWallet._create_secret_manager(ShimmerWallet.DEFAULT_SECRET_FILENAME, password) 
         self.instance = None
-        
+        self.active_user = None
         if not self._wallet_exists():
             raise Exception("Wallet not found. Create a wallet first.")
     
-
+    def request_funds(self) -> None:
+        account:Account = self.instance.get_account(self.active_user)
+        account.sync_account()
+        
+        address = account.generate_addresses(1)[0]["address"]
+        requests.post(ShimmerWallet.DEFAULT_FAUCET_URL, json={'address': address})
+        
     def check_balance(self, username:str=None) -> list:
         return self._check_balance_of_all_accounts() if username is None else self._check_balance_of_account(username)
     
@@ -87,7 +94,6 @@ class ShimmerWallet:
         
         return response
 
-            
     def _wallet_exists(self) -> bool:
         try:
             self.instance = ShimmerWallet._initialize_wallet(ShimmerWallet.DEFAULT_DATABASE_FILENAME, self.secret_manager, ShimmerWallet.DEFAULT_SHIMMER_COIN_TYPE, ShimmerWallet.DEFAULT_SHIMMER_CLIENT_OPTIONS)

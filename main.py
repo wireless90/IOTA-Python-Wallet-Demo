@@ -57,6 +57,9 @@ def handle_load_wallet() -> None:
         
 
     continue_prompt()
+
+    wallet_menu :ConsoleMenu = create_wallet_menu()
+    wallet_menu.show()
     
 
 
@@ -72,8 +75,7 @@ def handle_check_balance() -> None:
     if check_wallet_initialized_status() is False:
         return
 
-    username = input("Enter your account's username:\n")
-    response = wallet.check_balance(username)
+    response = wallet.check_balance(wallet.active_user)
     pretty_print(response)
     continue_prompt()
 
@@ -91,7 +93,9 @@ def handle_create_new_account() -> None:
     continue_prompt()
 
 def handle_request_shimmer_funds() -> None:
-    pass
+    wallet.request_funds()
+    print("\nShimmer has been requested. Give it a few seconds to be added to your account.\n\n")
+    continue_prompt()
 
 def handle_generate_mnemonic() -> None:
     mnemonic:str = ShimmerWallet.generate_mnemonic()
@@ -104,32 +108,31 @@ def handle_list_usernames() -> None:
     pretty_print(usernames)
     continue_prompt()
 
+def handle_switch_account() -> None:
+    username = input("Enter the username to switch to:\n")
+    wallet.active_user = username
+
+    account_menu :ConsoleMenu = create_account_menu()
+    account_menu.show()
+
+
 """
 Creates the Menu to prompt users to run an action.
 """
 def create_menu() -> ConsoleMenu:
-    MAIN_MENU_TITLE = "SHIMMER WALLET"
+    MAIN_MENU_TITLE = "SHIMMER Main Menu"
     MAIN_MENU_SUBTITLE = "Shimmer is the incentivized testnet for IOTA"
     main_menu = ConsoleMenu(MAIN_MENU_TITLE, MAIN_MENU_SUBTITLE)
-
+    
+    # Main
     GENERATE_MNEMONIC = "Generate new mnemonic"
     NEW_WALLET_TITLE = "Create a new Shimmer Wallet"
     LOAD_WALLET_TITLE = "Load an existing Shimmer Wallet"
-    CHECK_ALL_BALANCES_TITLE = "Check All Balances"
-    CHECK_BALANCE_TITLE = "Check Balance"
-    CREATE_ACCOUNT_TITLE = "Create new Account in Shimmer Wallet"
-    REQUEST_SHIMMER_FUNDS = "Request some Shimmer for testing purposes"
-    LIST_USERNAMES = "List all usernames"
 
     titles_and_handlers = [
         (GENERATE_MNEMONIC, handle_generate_mnemonic),
         (NEW_WALLET_TITLE, handle_create_new_wallet),
         (LOAD_WALLET_TITLE, handle_load_wallet),
-        (CREATE_ACCOUNT_TITLE, handle_create_new_account),
-        (CHECK_ALL_BALANCES_TITLE, handle_check_all_balance),
-        (CHECK_BALANCE_TITLE, handle_check_balance),
-        (REQUEST_SHIMMER_FUNDS, handle_request_shimmer_funds),
-        (LIST_USERNAMES, handle_list_usernames),
     ]
 
     for title_and_handler in titles_and_handlers:
@@ -137,6 +140,50 @@ def create_menu() -> ConsoleMenu:
     
 
     return main_menu
+
+def create_wallet_menu() -> ConsoleMenu:
+    
+    WALLET_MENU_TITLE = "SHIMMER WALLET"
+    WALLET_MENU_SUBTITLE = "Access your wallet features here"
+    wallet_menu = ConsoleMenu(WALLET_MENU_TITLE, WALLET_MENU_SUBTITLE)
+
+    CREATE_ACCOUNT_TITLE = "Create new Account in Shimmer Wallet"
+    LIST_USERNAMES = "List all usernames of accounts"
+    CHECK_ALL_BALANCES_TITLE = "Check All Balances"
+    SWITCH_TO_USER = "Switch to a user account"
+
+    titles_and_handlers = [
+        (CREATE_ACCOUNT_TITLE, handle_create_new_account),
+        (CHECK_ALL_BALANCES_TITLE, handle_check_all_balance),
+        (LIST_USERNAMES, handle_list_usernames),
+        (SWITCH_TO_USER, handle_switch_account),
+    ]
+
+    for title_and_handler in titles_and_handlers:
+        add_new_item_to_console_menu(wallet_menu, title_and_handler[0], title_and_handler[1])
+
+    return wallet_menu
+
+def create_account_menu() -> ConsoleMenu:
+    WALLET_MENU_TITLE = "SHIMMER ACCOUNT"
+    WALLET_MENU_SUBTITLE = "User: " + wallet.active_user
+
+    # Accout
+    CHECK_BALANCE_TITLE = "Check Balance"
+    REQUEST_SHIMMER_FUNDS = "Request some Shimmer for testing purposes"
+
+    account_menu :ConsoleMenu = ConsoleMenu(WALLET_MENU_TITLE, WALLET_MENU_SUBTITLE)
+
+    titles_and_handlers = [
+        (CHECK_BALANCE_TITLE, handle_check_balance),
+        (REQUEST_SHIMMER_FUNDS, handle_request_shimmer_funds),
+    ]
+
+    for title_and_handler in titles_and_handlers:
+        add_new_item_to_console_menu(account_menu, title_and_handler[0], title_and_handler[1])
+    
+    return account_menu
+
 def add_new_item_to_console_menu(menu:ConsoleMenu, title:str, handler) -> ConsoleMenu:
     menu_item = FunctionItem(title, handler)
     menu.append_item(menu_item)
