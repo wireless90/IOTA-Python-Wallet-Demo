@@ -99,6 +99,10 @@ def handle_generate_mnemonic() -> None:
     print("\n\nCopy the mnemonic down. It wont be shown again.\n\n")
     continue_prompt()
 
+def handle_list_usernames() -> None:
+    usernames:list[str] = wallet.list_usernames()
+    pretty_print(usernames)
+    continue_prompt()
 
 """
 Creates the Menu to prompt users to run an action.
@@ -115,6 +119,7 @@ def create_menu() -> ConsoleMenu:
     CHECK_BALANCE_TITLE = "Check Balance"
     CREATE_ACCOUNT_TITLE = "Create new Account in Shimmer Wallet"
     REQUEST_SHIMMER_FUNDS = "Request some Shimmer for testing purposes"
+    LIST_USERNAMES = "List all usernames"
 
     titles_and_handlers = [
         (GENERATE_MNEMONIC, handle_generate_mnemonic),
@@ -124,6 +129,7 @@ def create_menu() -> ConsoleMenu:
         (CHECK_ALL_BALANCES_TITLE, handle_check_all_balance),
         (CHECK_BALANCE_TITLE, handle_check_balance),
         (REQUEST_SHIMMER_FUNDS, handle_request_shimmer_funds),
+        (LIST_USERNAMES, handle_list_usernames),
     ]
 
     for title_and_handler in titles_and_handlers:

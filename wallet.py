@@ -1,6 +1,6 @@
 from __future__ import annotations
 from iota_wallet import StrongholdSecretManager, IotaWallet, Account
-
+import requests
 import json
 from pygments import highlight, lexers, formatters
 
@@ -13,7 +13,10 @@ class ShimmerWallet:
     }
     DEFAULT_DATABASE_FILENAME = './my_iota_db'
     DEFAULT_SECRET_FILENAME = 'stronghold'
-
+    DEFAULT_FAUCET_URL = 'https://faucet.testnet.shimmer.network/api/enqueue'
+    '''
+    {address: "rms1qz9f7vecqscfynnxacyzefwvpza0wz3r0lnnwrc8r7qhx65s5x7rx2fln5q"}
+    '''
     # TODO Remove it for production
     DEFAULT_PASSWORD = "password"
 
@@ -66,6 +69,11 @@ class ShimmerWallet:
     def check_balance(self, username:str=None) -> list:
         return self._check_balance_of_all_accounts() if username is None else self._check_balance_of_account(username)
     
+    def list_usernames(self) -> list[str]:
+        accounts_data = self.instance.get_accounts()
+        usernames = [data["alias"] for data in accounts_data]
+        return usernames
+
     def _check_balance_of_account(self, username:str) -> list:
         account:Account = self.instance.get_account(username)
         account.sync_account()
@@ -74,9 +82,7 @@ class ShimmerWallet:
         return [{"username": username, "shimmer": balance["baseCoin"]}]
 
     def _check_balance_of_all_accounts(self) -> list:
-        accounts_data = self.instance.get_accounts()
-        usernames = [data["alias"] for data in accounts_data]
-        
+        usernames :list[str]= self.list_usernames()
         response = [self._check_balance_of_account(username)[0] for username in usernames]
         
         return response
