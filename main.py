@@ -55,7 +55,7 @@ def handle_load_wallet() -> None:
     except:
         print("\nError loading wallet... \n\nEither create a new wallet or delete the stronghold file, if present, and create a new wallet with the same mnemonic.\n\n")
         
-        
+
     continue_prompt()
     
 
@@ -63,24 +63,18 @@ def handle_load_wallet() -> None:
 def handle_check_all_balance() -> None:
     if check_wallet_initialized_status() is False:
         return
-    instance:IotaWallet = wallet.instance
-    accounts = instance.get_accounts()
-    
-    pretty_print(accounts)
 
+    response = wallet.check_balance()
+    pretty_print(response)
     continue_prompt()
 
 def handle_check_balance() -> None:
     if check_wallet_initialized_status() is False:
         return
 
-    username = input("Enter your account's username.")
-    
-    instance:IotaWallet = wallet.instance
-    account:Account = instance.get_account(username)
-    balance = account.get_balance()
-    pretty_print(balance)
-
+    username = input("Enter your account's username:\n")
+    response = wallet.check_balance(username)
+    pretty_print(response)
     continue_prompt()
 
 def handle_create_new_account() -> None:
@@ -93,14 +87,17 @@ def handle_create_new_account() -> None:
     response = instance.create_account(alias=username)
 
     pretty_print(response)
-
     print("\n\nSuccessfully created new account with username ", username)
-
     continue_prompt()
 
-def handle_request_shimmer_funds():
+def handle_request_shimmer_funds() -> None:
     pass
-    
+
+def handle_generate_mnemonic() -> None:
+    ShimmerWallet.generate_mnemonic()
+    continue_prompt()
+
+
 """
 Creates the Menu to prompt users to run an action.
 """
@@ -109,7 +106,8 @@ def create_menu() -> ConsoleMenu:
     MAIN_MENU_SUBTITLE = "Shimmer is the incentivized testnet for IOTA"
     main_menu = ConsoleMenu(MAIN_MENU_TITLE, MAIN_MENU_SUBTITLE)
 
-    NEW_WALLET_TITLE = "Create a new Shimmer Wallet."
+    GENERATE_MNEMONIC = "Generate new mnemonic"
+    NEW_WALLET_TITLE = "Create a new Shimmer Wallet"
     LOAD_WALLET_TITLE = "Load an existing Shimmer Wallet"
     CHECK_ALL_BALANCES_TITLE = "Check All Balances"
     CHECK_BALANCE_TITLE = "Check Balance"
@@ -117,6 +115,7 @@ def create_menu() -> ConsoleMenu:
     REQUEST_SHIMMER_FUNDS = "Request some Shimmer for testing purposes"
 
     titles_and_handlers = [
+        (GENERATE_MNEMONIC, handle_generate_mnemonic),
         (NEW_WALLET_TITLE, handle_create_new_wallet),
         (LOAD_WALLET_TITLE, handle_load_wallet),
         (CREATE_ACCOUNT_TITLE, handle_create_new_account),

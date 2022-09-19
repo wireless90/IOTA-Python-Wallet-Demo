@@ -1,7 +1,11 @@
 from __future__ import annotations
 from iota_wallet import StrongholdSecretManager, IotaWallet, Account
 
+import json
+from pygments import highlight, lexers, formatters
+
 class ShimmerWallet:
+    # region Constants
 
     DEFAULT_SHIMMER_COIN_TYPE = 4219 #id of shimmer coin type
     DEFAULT_SHIMMER_CLIENT_OPTIONS = {
@@ -14,8 +18,17 @@ class ShimmerWallet:
     DEFAULT_PASSWORD = "password"
 
     # TODO Remove it for production
-    DEFAULT_MNEMONIC = "flame fever pig forward exact dash body idea link scrub tennis minute surge unaware prosper over waste kitten ceiling human knife arch situate civil"
+    DEFAULT_MNEMONIC = "sail symbol venture people general equal sight pencil slight muscle sausage faculty retreat decorate library all humor metal place mandate cake door disease dwarf"
+    #endregion
 
+    # region static methods
+
+    @staticmethod
+    def generate_mnemonic() -> str:
+        dummy_wallet :IotaWallet = IotaWallet('./mnemonic_generation', coin_type=ShimmerWallet.DEFAULT_SHIMMER_COIN_TYPE, client_options={'offline':True}, secret_manager="Placeholder")
+        mnemonic = dummy_wallet.generate_mnemonic()
+        ShimmerWallet.pretty_print(mnemonic)
+        
     """
     Creates a new Shimmer wallet
     """
@@ -33,12 +46,41 @@ class ShimmerWallet:
     def _create_secret_manager(secret_filename:str, secret_password:str) -> StrongholdSecretManager:
         return StrongholdSecretManager(secret_filename, secret_password)
 
+    @staticmethod
+    def pretty_print(input) -> None:
+        output_json = json.dumps(input, sort_keys=True, indent=4)
+        colored_json = highlight(output_json,lexers.JsonLexer(), formatters.TerminalFormatter())
+        print(colored_json)
+
+    #endregion
+
+
     def __init__(self, password :str=DEFAULT_PASSWORD):
         self.secret_manager :StrongholdSecretManager = ShimmerWallet._create_secret_manager(ShimmerWallet.DEFAULT_SECRET_FILENAME, password) 
         self.instance = None
         
         if not self._wallet_exists():
             raise Exception("Wallet not found. Create a wallet first.")
+    
+
+    def check_balance(self, username:str=None) -> list:
+        return self._check_balance_of_all_accounts() if username is None else self._check_balance_of_account(username)
+    
+    def _check_balance_of_account(self, username:str) -> list:
+        account:Account = self.instance.get_account(username)
+        account.sync_account()
+        balance = account.get_balance()
+        # ShimmerWallet.pretty_print(balance)
+        return [{"username": username, "shimmer": balance["baseCoin"]}]
+
+    def _check_balance_of_all_accounts(self) -> list:
+        accounts_data = self.instance.get_accounts()
+        usernames = [data["alias"] for data in accounts_data]
+        
+        response = [self._check_balance_of_account(username)[0] for username in usernames]
+        
+        return response
+
             
     def _wallet_exists(self) -> bool:
         try:
