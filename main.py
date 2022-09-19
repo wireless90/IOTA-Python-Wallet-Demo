@@ -1,3 +1,4 @@
+from audioop import add
 import json
 from pygments import highlight, lexers, formatters
 from consolemenu import ConsoleMenu
@@ -115,6 +116,18 @@ def handle_switch_account() -> None:
     account_menu :ConsoleMenu = create_account_menu()
     account_menu.show()
 
+def handle_create_receive_address() -> None:
+    address:str = wallet.get_a_receive_address()
+    print("You address have been generated!\n\n")
+    pretty_print(address)
+    continue_prompt()
+
+def handle_send_shimmer() -> None:
+    amount:str = input("Enter amount to send:\n")
+    address:str = input("Enter a receiving address to send to:\n")
+    wallet.send_shimmer(amount, address)
+
+    print("{0} glow has been sent successfully to address {1}.\n", amount, address)
 
 """
 Creates the Menu to prompt users to run an action.
@@ -171,12 +184,16 @@ def create_account_menu() -> ConsoleMenu:
     # Accout
     CHECK_BALANCE_TITLE = "Check Balance"
     REQUEST_SHIMMER_FUNDS = "Request some Shimmer for testing purposes"
+    CREATE_RECEIVE_ADDRESS = "Create a receive address"
+    SEND_SHIMMER = "Send shimmer to another address"
 
     account_menu :ConsoleMenu = ConsoleMenu(WALLET_MENU_TITLE, WALLET_MENU_SUBTITLE)
 
     titles_and_handlers = [
         (CHECK_BALANCE_TITLE, handle_check_balance),
         (REQUEST_SHIMMER_FUNDS, handle_request_shimmer_funds),
+        (CREATE_RECEIVE_ADDRESS, handle_create_receive_address),
+        (SEND_SHIMMER, handle_send_shimmer),
     ]
 
     for title_and_handler in titles_and_handlers:

@@ -66,25 +66,30 @@ class ShimmerWallet:
         if not self._wallet_exists():
             raise Exception("Wallet not found. Create a wallet first.")
     
+    def send_shimmer(self, amount:str, address:str):
+        account:Account = self._sync_account()
+        account.send_amount([{"address":address, "amount":amount}])
+
     def request_funds(self) -> None:
-        account:Account = self.instance.get_account(self.active_user)
-        account.sync_account()
-        
-        address = account.generate_addresses(1)[0]["address"]
+        address = self.get_a_receive_address()
         requests.post(ShimmerWallet.DEFAULT_FAUCET_URL, json={'address': address})
         
     def check_balance(self, username:str=None) -> list:
         return self._check_balance_of_all_accounts() if username is None else self._check_balance_of_account(username)
     
+    def get_a_receive_address(self)-> str:
+        account:Account = self._sync_account()
+        return account.generate_addresses(1)[0]["address"]
+
     def list_usernames(self) -> list[str]:
         accounts_data = self.instance.get_accounts()
         usernames = [data["alias"] for data in accounts_data]
         return usernames
 
     def _check_balance_of_account(self, username:str) -> list:
-        account:Account = self.instance.get_account(username)
-        account.sync_account()
+        account:Account = self._sync_account(username)
         balance = account.get_balance()
+
         # ShimmerWallet.pretty_print(balance)
         return [{"username": username, "shimmer": balance["baseCoin"]}]
 
@@ -101,6 +106,14 @@ class ShimmerWallet:
         except Exception as e:
             print(e)
             return False
+
+    def _sync_account(self, username=None) -> Account:
+        username = self.active_user if username is None else username
+
+        account:Account = self.instance.get_account(username)
+        print("\n\nSyncing account for ", username, "...Please wait...\n\n")
+        account.sync_account()
+        return account
 
     @staticmethod
     def _initialize_wallet(database_filename:str, secret_manager:StrongholdSecretManager, coin_type:int, options:dict) -> IotaWallet :
