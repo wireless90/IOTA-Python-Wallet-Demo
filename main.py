@@ -94,7 +94,9 @@ def handle_request_shimmer_funds() -> None:
     pass
 
 def handle_generate_mnemonic() -> None:
-    ShimmerWallet.generate_mnemonic()
+    mnemonic:str = ShimmerWallet.generate_mnemonic()
+    pretty_print(mnemonic)
+    print("\n\nCopy the mnemonic down. It wont be shown again.\n\n")
     continue_prompt()
 
 

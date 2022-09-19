@@ -27,7 +27,7 @@ class ShimmerWallet:
     def generate_mnemonic() -> str:
         dummy_wallet :IotaWallet = IotaWallet('./mnemonic_generation', coin_type=ShimmerWallet.DEFAULT_SHIMMER_COIN_TYPE, client_options={'offline':True}, secret_manager="Placeholder")
         mnemonic = dummy_wallet.generate_mnemonic()
-        ShimmerWallet.pretty_print(mnemonic)
+        return mnemonic
         
     """
     Creates a new Shimmer wallet
