@@ -351,3 +351,4 @@ MigrationBackup/
 
 stronghold
 my_iota_db/*
+mnemonic_generation/*
